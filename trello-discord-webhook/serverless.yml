@@ -1,0 +1,28 @@
+service: trello-discord-webhook
+
+provider:
+  name: aws
+  runtime: python3.6
+
+# you can overwrite defaults here
+  stage: dev
+  region: ap-northeast-1
+  memorySize: 128
+  timeout: 10
+
+custom: ${file(./variables.yml)}
+
+functions:
+  webhook:
+    handler: handler.webhook_to_discord
+    events:
+      - http:
+          path: webhook
+          method: post
+      - http:
+          path: webhook
+          method: head
+    environment:
+      DISCORD_WEBHOOK_URL: ${self:custom.DISCORD_WEBHOOK_URL}
+plugins:
+  - serverless-python-requirements
