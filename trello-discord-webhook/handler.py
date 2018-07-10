@@ -43,6 +43,11 @@ def webhook_to_discord(event, context):
             message='カードにコメントが追加されました',
             embeds=[webhook_body.get_embed_object()]
         )
+    elif webhook_body.action.type == 'updateCheckItemStateOnCard':
+        post_to_discord(
+            message='チェックリストが更新されました',
+            embeds=[webhook_body.get_embed_object()]
+        )
 
     else:
         print('not supported => {action_type}'.format(

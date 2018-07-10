@@ -20,6 +20,18 @@ class TrelloWebhookBody(object):
             if 'idList' in self.action.data.old:
                 embed['description'] = '[リスト移動]\n{before} -> {after}'.format(
                     before=self.action.data.listBefore.name, after=self.action.data.listAfter.name)
+            if 'desc' in self.action.data.old:
+                embed['description'] = '[詳細更新]\n{text}'.format(
+                    text=self.action.data.card.desc
+                )
+        
+        elif self.action.type == 'updateCheckItemStateOnCard':
+            # チェックリストアイテム更新時
+            embed['description'] = '[{name}]\n - [{state}] {text}'.format(
+                name=self.action.data.checklist.name,
+                state='完了' if self.action.data.checkItem.state == 'complete' else '未完了',
+                text=self.action.data.checkItem.name)
+
         
         embed['footer'] = {
             'text': 'Update by {username} ({time})'.format(
@@ -69,6 +81,8 @@ class TrelloAction(object):
             self.voted = kwargs.get('voted')
             self.text = kwargs.get('text')
             self.old = kwargs.get('old')
+            self.checkItem = TrelloAction.Data.CheckItem(**kwargs.get('checkItem', {}))
+            self.checklist = TrelloAction.Data.CheckList(**kwargs.get('checklist', {}))
 
         class Board(object):
             def __init__(self, **kwargs):
@@ -82,8 +96,20 @@ class TrelloAction(object):
                 self.idShort = kwargs.get('idShort')
                 self.name = kwargs.get('name')
                 self.id = kwargs.get('id')
+                self.desc = kwargs.get('desc')
 
         class List(object):
+            def __init__(self, **kwargs):
+                self.name = kwargs.get('name')
+                self.id = kwargs.get('id')
+        
+        class CheckItem(object):
+            def __init__(self, **kwargs):
+                self.state = kwargs.get('state')
+                self.name = kwargs.get('name')
+                self.id = kwargs.get('id')
+            
+        class CheckList(object):
             def __init__(self, **kwargs):
                 self.name = kwargs.get('name')
                 self.id = kwargs.get('id')
