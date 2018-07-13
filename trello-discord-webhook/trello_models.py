@@ -10,7 +10,7 @@ class TrelloWebhookBody(object):
     def get_embed_object(self):
         embed = {}
 
-        embed['title'] = self.action.display.entities.card.text
+        embed['title'] = self.action.data.card.name
         embed['url'] = 'https://trello.com/c/{short_link}'.format(short_link=self.action.data.card.shortLink)
 
         if self.action.type == 'commentCard':
@@ -24,6 +24,8 @@ class TrelloWebhookBody(object):
                 embed['description'] = '[詳細更新]\n{text}'.format(
                     text=self.action.data.card.desc
                 )
+            if 'idAttachmentCover' in self.action.data.old:
+                embed['description'] = '画像が追加されました'
         
         elif self.action.type == 'updateCheckItemStateOnCard':
             # チェックリストアイテム更新時
@@ -32,6 +34,13 @@ class TrelloWebhookBody(object):
                 state='完了' if self.action.data.checkItem.state == 'complete' else '未完了',
                 text=self.action.data.checkItem.name)
 
+        elif self.action.type == 'addAttachmentToCard':
+            embed['description'] = '[添付ファイル] {name}'.format(
+                name=self.action.data.attachment.name
+            )
+            embed['image'] = {
+                'url': self.action.data.attachment.url
+            }
         
         embed['footer'] = {
             'text': 'Update by {username} ({time})'.format(
@@ -83,6 +92,7 @@ class TrelloAction(object):
             self.old = kwargs.get('old')
             self.checkItem = TrelloAction.Data.CheckItem(**kwargs.get('checkItem', {}))
             self.checklist = TrelloAction.Data.CheckList(**kwargs.get('checklist', {}))
+            self.attachment = TrelloAction.Data.Attachment(**kwargs.get('attachment', {}))
 
         class Board(object):
             def __init__(self, **kwargs):
@@ -113,6 +123,15 @@ class TrelloAction(object):
             def __init__(self, **kwargs):
                 self.name = kwargs.get('name')
                 self.id = kwargs.get('id')
+        
+        class Attachment(object):
+            def __init__(self, **kwargs):
+                self.url = kwargs.get('url')
+                self.name = kwargs.get('name')
+                self.id = kwargs.get('id')
+                self.edgeColor = kwargs.get('edgeColor')
+                self.previewUrl = kwargs.get('previewUrl')
+                self.previewUrl2x = kwargs.get('previewUrl2x')
 
     class Display(object):
         def __init__(self, **kwargs):
