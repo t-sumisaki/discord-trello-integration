@@ -26,7 +26,7 @@ class TrelloWebhookBody(object):
                 )
             if 'idAttachmentCover' in self.action.data.old:
                 embed['description'] = '画像が追加されました'
-        
+                    
         elif self.action.type == 'updateCheckItemStateOnCard':
             # チェックリストアイテム更新時
             embed['description'] = '[{name}]\n - [{state}] {text}'.format(

@@ -33,8 +33,14 @@ def webhook_to_discord(event, context):
         )
 
     elif webhook_body.action.type == 'updateCard':
+
+        if webhook_body.action.display.translationKey == 'action_archived_card':
+            msg = 'カードがアーカイブされました'
+        else:
+            msg = 'カードが更新されました'
+
         post_to_discord(
-            message='カードが更新されました',
+            message=msg,
             embeds=[webhook_body.get_embed_object()]
         )
 
